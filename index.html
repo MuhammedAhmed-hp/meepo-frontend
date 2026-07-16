@@ -390,7 +390,6 @@
   let isSignUpMode = false; 
   let currentUserName = ""; 
 
-  // Make core operational functions global so structural click triggers find them cleanly
   let toggleAuthMode, createNewChat, handleLogout, handleSendMessage;
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -411,25 +410,28 @@
     const newChatBtn = document.getElementById('newChatBtn');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    // Toggle logic definition
+    // Set the initial cornerstone button text
+    cornerToggleBtn.textContent = "Register Here";
+    // Set the initial subtitle instruction warning users to sign up first
+    authSubtitle.innerHTML = "New here? Please <span style='color: #007acc; font-weight:bold;'>Sign Up</span> using the button in the top right corner before signing in!";
+
     toggleAuthMode = function() {
       isSignUpMode = !isSignUpMode;
       if (isSignUpMode) {
-        authSubtitle.textContent = "Create an account to start chatting";
+        authSubtitle.textContent = "Fill out the form below to create your account.";
         authSubmitBtn.textContent = "Sign Up";
         cornerToggleBtn.textContent = "Sign In";
         authName.style.display = "block"; 
         authName.required = true;
       } else {
-        authSubtitle.textContent = "Please sign in to start chatting";
+        authSubtitle.innerHTML = "New here? Please <span style='color: #007acc; font-weight:bold;'>Sign Up</span> using the button in the top right corner before signing in!";
         authSubmitBtn.textContent = "Sign In";
-        cornerToggleBtn.textContent = "Create Account";
+        cornerToggleBtn.textContent = "Register Here";
         authName.style.display = "none"; 
         authName.required = false;
       }
     };
 
-    // Bind layout button listeners safely
     cornerToggleBtn.addEventListener('click', toggleAuthMode);
     newChatBtn.addEventListener('click', () => createNewChat());
     logoutBtn.addEventListener('click', () => handleLogout());
@@ -438,13 +440,11 @@
       if (e.key === 'Enter') handleSendMessage();
     });
 
-    // Check for an active user session straight away
     const savedName = localStorage.getItem('TingTalk_user_name');
     if (savedName) {
       loginUserSession(savedName);
     }
 
-    // Try starting Google Sign-in asynchronously without freezing layout logic
     setTimeout(() => {
       try {
         if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
@@ -491,7 +491,7 @@
         }
 
         if (isSignUpMode) {
-          alert("Account created successfully! You can now log in.");
+          alert("Account created successfully! You can now log in using your new details.");
           toggleAuthMode(); 
         } else {
           const userDisplayName = data.name || name || email.split('@')[0];
@@ -716,6 +716,9 @@
       authName.value = '';
       authEmail.value = '';
       authPassword.value = '';
+      // Reset text states on logout
+      cornerToggleBtn.textContent = "Register Here";
+      authSubtitle.innerHTML = "New here? Please <span style='color: #007acc; font-weight:bold;'>Sign Up</span> using the button in the top right corner before signing in!";
     };
   });
 </script>
