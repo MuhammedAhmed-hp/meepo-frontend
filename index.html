@@ -35,10 +35,74 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
+      gap: 15px;
       width: 90%;
       max-width: 400px;
     }
+
+    /* Email / Password Form Styling */
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 10px 12px;
+      background: #111115;
+      border: 1px solid #3a3a42;
+      border-radius: 8px;
+      color: white;
+      outline: none;
+      font-size: 14px;
+    }
+    .auth-input:focus {
+      border-color: #007acc;
+    }
+
+    .auth-submit-btn {
+      background: #007acc;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 15px;
+      transition: background 0.2s;
+    }
+    .auth-submit-btn:hover {
+      background: #005999;
+    }
+
+    .toggle-auth-mode {
+      color: #007acc;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: underline;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      color: #666;
+      font-size: 0.85rem;
+      margin: 5px 0;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #2a2a30;
+    }
+    .divider:not(:empty)::before { margin-right: .5em; }
+    .divider:not(:empty)::after { margin-left: .5em; }
 
     /* Responsive Main App Layout */
     .chat-container {
@@ -227,8 +291,22 @@
 <body>
 
   <div id="auth-screen">
-    <h2>Welcome to TingTalk AI</h2>
-    <p style="color: #aaa; font-size: 0.95rem;">Please sign in to start chatting</p>
+    <h2 id="auth-title">Welcome to TingTalk AI</h2>
+    <p id="auth-subtitle" style="color: #aaa; font-size: 0.95rem;">Please sign in to start chatting</p>
+    
+    <form class="auth-form" id="emailAuthForm">
+      <input type="email" id="authEmail" class="auth-input" placeholder="Email Address" required>
+      <input type="password" id="authPassword" class="auth-input" placeholder="Password" required>
+      <button type="submit" id="authSubmitBtn" class="auth-submit-btn">Sign In</button>
+    </form>
+
+    <div>
+      <span style="font-size: 0.9rem; color: #888;">Or want to </span>
+      <button class="toggle-auth-mode" id="toggleAuthModeBtn" onclick="toggleAuthMode()">Create an account</button>
+    </div>
+
+    <div class="divider">or</div>
+
     <div id="googleBtn"></div>
   </div>
 
@@ -259,12 +337,22 @@
   const userInput = document.getElementById('userInput');
   const sendBtn = document.getElementById('sendBtn');
   const conversationsList = document.getElementById('conversationsList');
+  
+  // Auth Form Elements
+  const emailAuthForm = document.getElementById('emailAuthForm');
+  const authEmail = document.getElementById('authEmail');
+  const authPassword = document.getElementById('authPassword');
+  const authSubmitBtn = document.getElementById('authSubmitBtn');
+  const toggleAuthModeBtn = document.getElementById('toggleAuthModeBtn');
+  const authSubtitle = document.getElementById('authSubtitle');
 
   const API_URL = 'https://ai-backend-sdpl.onrender.com/chat';
+  const BACKEND_BASE = 'https://ai-backend-sdpl.onrender.com/api'; // Base endpoint for signup/login
   
   // Storage arrays
   let allSavedChats = []; 
   let activeChatId = null;
+  let isSignUpMode = false; // Tracks whether form is on Sign In or Sign Up
 
   // 🚨 REPLACE THIS STRING WITH YOUR ACTUAL CLIENT ID FROM GOOGLE CLOUD
   const GOOGLE_CLIENT_ID = "266718863915-f7d2jmp4fhlpvuk53kn0jisi58arrmrm.apps.googleusercontent.com";
@@ -279,6 +367,68 @@
       { theme: "dark", size: "large", type: "standard" }
     );
   }
+
+  /* --- EMAIL & PASSWORD LOGIN/SIGNUP LOGIC --- */
+
+  function toggleAuthMode() {
+    isSignUpMode = !isSignUpMode;
+    if (isSignUpMode) {
+      authSubtitle.textContent = "Create an account to start chatting";
+      authSubmitBtn.textContent = "Sign Up";
+      toggleAuthModeBtn.textContent = "Sign In instead";
+    } else {
+      authSubtitle.textContent = "Please sign in to start chatting";
+      authSubmitBtn.textContent = "Sign In";
+      toggleAuthModeBtn.textContent = "Create an account";
+    }
+  }
+
+  emailAuthForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+
+    if (!email || !password) return;
+
+    // Determine target URL based on active form state
+    const endpoint = isSignUpMode ? `${BACKEND_BASE}/signup` : `${BACKEND_BASE}/login`;
+
+    try {
+      authSubmitBtn.disabled = true;
+      authSubmitBtn.textContent = isSignUpMode ? "Registering..." : "Signing In...";
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "An error occurred");
+      }
+
+      if (isSignUpMode) {
+        alert("Account created successfully! You can now log in.");
+        toggleAuthMode(); // Switch back to login mode automatically
+      } else {
+        // Log in user
+        authScreen.style.display = 'none';
+        chatContainer.style.display = 'flex';
+        welcomeTitle.textContent = `Chatting as ${email.split('@')[0]} 👋`;
+        loadFromLocalStorage();
+      }
+
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      authSubmitBtn.disabled = false;
+      authSubmitBtn.textContent = isSignUpMode ? "Sign Up" : "Sign In";
+    }
+  });
+
+  /* --- GOOGLE OAUTH LOGIC --- */
 
   function handleCredentialResponse(response) {
     const base64Url = response.credential.split('.')[1];
@@ -463,6 +613,8 @@
     conversationsList.innerHTML = '';
     chatContainer.style.display = 'none';
     authScreen.style.display = 'flex';
+    authEmail.value = '';
+    authPassword.value = '';
   }
 
   sendBtn.addEventListener('click', handleSendMessage);
