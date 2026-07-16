@@ -183,11 +183,9 @@
       margin-bottom: 20px;
     }
 
-
     /* ==========================================================================
-       2. AUTHENTICATION SCREEN STYLES (Adjusted)
+       2. AUTHENTICATION SCREEN STYLES
        ========================================================================== */
-    /* ↗️ Corner Auth Toggle Button (Hidden on main landing, used in auth flow) */
     .corner-toggle-btn {
       position: absolute;
       top: 20px;
@@ -202,7 +200,7 @@
       font-weight: bold;
       transition: all 0.2s ease;
       z-index: 10;
-      display: none; /* Controlled dynamically */
+      display: none;
     }
     .corner-toggle-btn:hover {
       background: #007acc;
@@ -210,7 +208,7 @@
     }
 
     #auth-screen {
-      display: none; /* Controlled dynamically */
+      display: none;
       text-align: center;
       background: #1a1a1e;
       padding: 30px 20px;
@@ -300,17 +298,47 @@
       justify-content: center;
     }
 
-
     /* ==========================================================================
-       3. RESPONSIVE CHAT APPLICATION SYSTEM
+       3. ACTIVE CHAT WORKSPACE (Now takes up full screen with a logo gap at top)
        ========================================================================== */
     .chat-container {
-      display: none; /* Controlled dynamically */
-      width: 100%;
-      max-width: 2200px;
+      display: none;
+      width: 100vw;
       height: 100vh; 
       background: #000000;
-      flex-direction: row; 
+      flex-direction: column; 
+      overflow: hidden;
+    }
+
+    /* Small gap at the top containing a clickable home button logo */
+    .chat-top-nav {
+      width: 100%;
+      height: 45px;
+      background: #000000;
+      display: flex;
+      align-items: center;
+      padding: 5px 16px;
+      border-bottom: 1px solid #111115;
+    }
+
+    .chat-nav-logo {
+      height: 32px;
+      width: auto;
+      object-fit: contain;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .chat-nav-logo:hover {
+      transform: scale(1.05);
+    }
+
+    /* Outer wrapper split horizontally into sidebar + content frame */
+    .chat-main-wrapper {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      flex: 1;
       overflow: hidden;
     }
 
@@ -483,6 +511,23 @@
       border-bottom-left-radius: 2px;
     }
 
+    /* Styled centered alignment for the AI thinking indicator container */
+    .message.TingTalk.thinking-center {
+      align-self: center;
+      background-color: transparent;
+      color: #007acc;
+      font-weight: 500;
+      text-align: center;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 100%;
+      padding: 20px 0;
+    }
+
     .chat-input-area {
       padding: 12px 16px;
       background: #1a1a1e;
@@ -504,6 +549,14 @@
     }
     input:focus { border-color: #007acc; }
 
+    /* Button disabled view adjustment styling state */
+    .send-button:disabled {
+      background: #1a1a1e;
+      border: 1px solid #2a2a30;
+      color: #555;
+      cursor: not-allowed;
+    }
+
     .send-button {
       background: #007acc;
       color: white;
@@ -512,9 +565,10 @@
       border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
+      transition: background 0.2s;
     }
 
-    /* Wave animation */
+    /* Wave animation indicators */
     .typing-indicator {
       display: inline-flex;
       align-items: center;
@@ -525,7 +579,7 @@
     .typing-dot {
       width: 6px;
       height: 6px;
-      background-color: #f1f1f1;
+      background-color: #007acc;
       border-radius: 50%;
       animation: dotWave 1.4s infinite ease-in-out;
     }
@@ -554,13 +608,6 @@
     }
 
     @media (min-width: 768px) {
-      body { padding: 20px; }
-      .chat-container {
-        height: 80vh; 
-        border-radius: 16px;
-        border: 1px solid #2a2a30;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-      }
       .message { max-width: 70%; }
     }
   </style>
@@ -571,7 +618,7 @@
 
   <div id="home-screen">
     <header class="hero">
-      <img src="TingTalk-removebg-preview.png" alt="TingTalk Logo" class="hero-logo" onerror="this.style.display='none'">
+      <img src="TingTalk-removebg-preview.png" alt="TingTalk Logo" class="hero-logo" id="homeLogo">
       <h1>Meet TingTalk AI</h1>
       <p>An intelligent, highly responsive, and context-aware conversational assistant built to simplify your day and boost your productivity.</p>
       
@@ -626,23 +673,29 @@
   </div>
 
   <div class="chat-container" id="chatContainer">
-    <div class="sidebar" id="sidebar">
-      <button class="new-chat-btn" id="newChatBtn">+ New Chat</button>
-      <div class="conversations-list" id="conversationsList"></div>
+    <div class="chat-top-nav" id="chatTopNav">
+      <img src="TingTalk-removebg-preview.png" alt="Home Navigation Button" class="chat-nav-logo" id="chatNavHomeBtn">
     </div>
 
-    <div class="main-chat">
-      <div class="chat-header">
-        <div class="header-left">
-          <button class="toggle-sidebar-btn" id="toggleSidebarBtn">☰</button>
-          <span id="welcomeTitle">TingTalk AI</span>
-        </div>
-        <button class="logout-btn" id="logoutBtn">Sign Out</button>
+    <div class="chat-main-wrapper">
+      <div class="sidebar" id="sidebar">
+        <button class="new-chat-btn" id="newChatBtn">+ New Chat</button>
+        <div class="conversations-list" id="conversationsList"></div>
       </div>
-      <div class="chat-messages" id="chatMessages"></div>
-      <div class="chat-input-area">
-        <input type="text" id="userInput" placeholder="Type a message to TingTalk..." autocomplete="off">
-        <button class="send-button" id="sendBtn">Send</button>
+
+      <div class="main-chat">
+        <div class="chat-header">
+          <div class="header-left">
+            <button class="toggle-sidebar-btn" id="toggleSidebarBtn">☰</button>
+            <span id="welcomeTitle">TingTalk AI</span>
+          </div>
+          <button class="logout-btn" id="logoutBtn">Sign Out</button>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-area">
+          <input type="text" id="userInput" placeholder="Type a message to TingTalk..." autocomplete="off">
+          <button class="send-button" id="sendBtn">Send</button>
+        </div>
       </div>
     </div>
   </div>
@@ -656,8 +709,9 @@
   let activeChatId = null;
   let isSignUpMode = false; 
   let currentUserName = ""; 
+  let isAiThinking = false; // Flag to prevent multiple message submissions
 
-  let toggleAuthMode, createNewChat, handleLogout, handleSendMessage;
+  let toggleAuthMode, createNewChat, handleLogout, handleSendMessage, returnToLandingPage;
 
   document.addEventListener('DOMContentLoaded', () => {
     const homeScreen = document.getElementById('home-screen');
@@ -680,16 +734,24 @@
     const newChatBtn = document.getElementById('newChatBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     
-    // Landing Page Buttons
+    // Landing Page Navigation Elements
     const landingSignInBtn = document.getElementById('landingSignInBtn');
     const landingGoToChatBtn = document.getElementById('landingGoToChatBtn');
     const backToHomeBtn = document.getElementById('backToHomeBtn');
+    const chatNavHomeBtn = document.getElementById('chatNavHomeBtn');
+    const homeLogo = document.getElementById('homeLogo');
 
-    // Set the initial cornerstone button text
+    // Handle missing logo image views cleanly if file is absent
+    const checkLogoImage = (el) => {
+      if (el) el.onerror = () => el.style.display = 'none';
+    };
+    checkLogoImage(homeLogo);
+    checkLogoImage(chatNavHomeBtn);
+
     cornerToggleBtn.textContent = "Register Here";
     authSubtitle.innerHTML = "New here? Please <span style='color: #007acc; font-weight:bold;'>Sign Up</span> using the button in the top right corner before signing in!";
 
-    // Navigation and Flow Handlers
+    // Route functions
     landingSignInBtn.addEventListener('click', () => {
       homeScreen.style.display = 'none';
       authScreen.style.display = 'flex';
@@ -708,6 +770,22 @@
         loginUserSession(savedName);
       }
     });
+
+    // Top logo navigation return route sequence
+    returnToLandingPage = function() {
+      chatContainer.style.display = 'none';
+      authScreen.style.display = 'none';
+      cornerToggleBtn.style.display = 'none';
+      homeScreen.style.display = 'flex';
+      
+      // Update CTAs on landing board interface seamlessly 
+      const savedName = localStorage.getItem('TingTalk_user_name');
+      if (savedName) {
+        landingGoToChatBtn.style.display = 'inline-block';
+        landingSignInBtn.textContent = "Switch Account";
+      }
+    };
+    chatNavHomeBtn.addEventListener('click', returnToLandingPage);
 
     // Sidebar Slide Collapse Handler
     if (toggleSidebarBtn && sidebar) {
@@ -739,17 +817,19 @@
     };
 
     cornerToggleBtn.addEventListener('click', toggleAuthMode);
-    newChatBtn.addEventListener('click', () => createNewChat());
+    newChatBtn.addEventListener('click', () => {
+      if (isAiThinking) return; // Prevent creating chats while request loads
+      createNewChat();
+    });
     logoutBtn.addEventListener('click', () => handleLogout());
     sendBtn.addEventListener('click', () => handleSendMessage());
     userInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') handleSendMessage();
     });
 
-    // Session State Check on bootup
+    // Boot checking layout parameters
     const savedName = localStorage.getItem('TingTalk_user_name');
     if (savedName) {
-      // Show returning users the "Go to Chat" shortcut instantly on landing
       landingGoToChatBtn.style.display = 'inline-block';
       landingSignInBtn.textContent = "Switch Account";
     }
@@ -888,7 +968,10 @@
         item.classList.add('chat-item');
         if (chat.id === activeChatId) item.classList.add('active');
         
-        item.onclick = () => switchChat(chat.id);
+        item.onclick = () => {
+          if (isAiThinking) return; // Prevent switching rooms while waiting for response
+          switchChat(chat.id);
+        };
 
         const titleSpan = document.createElement('span');
         titleSpan.textContent = chat.title;
@@ -899,6 +982,7 @@
         delBtn.innerHTML = '×';
         delBtn.onclick = (e) => {
           e.stopPropagation(); 
+          if (isAiThinking) return;
           deleteChat(chat.id);
         };
         
@@ -951,8 +1035,16 @@
     }
 
     handleSendMessage = async function() {
+      // 1. Guard check to completely block input submissions when AI is thinking
+      if (isAiThinking) return;
+
       const message = userInput.value.trim();
       if (!message) return;
+
+      // Toggle state flags & UI elements to prevent further requests
+      isAiThinking = true;
+      sendBtn.disabled = true;
+      userInput.disabled = true;
 
       appendMessageElements(message, 'user');
       userInput.value = '';
@@ -965,8 +1057,9 @@
         renderSidebar();
       }
 
+      // 2. Centered loading layout construction zone
       const loadingDiv = document.createElement('div');
-      loadingDiv.classList.add('message', 'TingTalk');
+      loadingDiv.classList.add('message', 'TingTalk', 'thinking-center');
       loadingDiv.innerHTML = `
         TingTalk is thinking
         <div class="typing-indicator">
@@ -1009,6 +1102,12 @@
         if (chatMessages.contains(loadingDiv)) loadingDiv.remove();
         appendMessageElements('Could not connect to TingTalk. 🔌', 'TingTalk');
         console.error(error);
+      } finally {
+        // 3. Reinstate full interactive permissions on complete cycle release
+        isAiThinking = false;
+        sendBtn.disabled = false;
+        userInput.disabled = false;
+        userInput.focus();
       }
     };
 
@@ -1016,18 +1115,21 @@
       allSavedChats = [];
       activeChatId = null;
       currentUserName = "";
+      isAiThinking = false;
       localStorage.removeItem('TingTalk_user_name'); 
       localStorage.removeItem('TingTalk_saved_chats');
       chatMessages.innerHTML = '';
       conversationsList.innerHTML = '';
-      chatContainer.style.display = 'none';
       
-      // Return to landing page state
+      // Re-enable input configurations upon state clear transitions
+      sendBtn.disabled = false;
+      userInput.disabled = false;
+
+      chatContainer.style.display = 'none';
       authScreen.style.display = 'none';
       cornerToggleBtn.style.display = 'none'; 
       homeScreen.style.display = 'flex';
       
-      // Reset landing buttons
       landingGoToChatBtn.style.display = 'none';
       landingSignInBtn.textContent = "Sign In / Get Started";
 
