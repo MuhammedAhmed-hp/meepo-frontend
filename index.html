@@ -425,7 +425,7 @@
 
     const loadingDiv = document.createElement('div');
     loadingDiv.classList.add('message', 'meepo');
-    loadingDiv.textContent = 'Meepo is thinking... 🤔';
+    loadingDiv.textContent = 'TingTalk is thinking... 🤔';
     chatMessages.appendChild(loadingDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
@@ -451,7 +451,7 @@
 
     } catch (error) {
       if (chatMessages.contains(loadingDiv)) loadingDiv.remove();
-      appendMessageElements('Could not connect to Meepo. 🔌', 'meepo');
+      appendMessageElements('Could not connect to TingTalk. 🔌', 'meepo');
       console.error(error);
     }
   }
