@@ -279,6 +279,31 @@
       font-weight: bold;
     }
 
+    /* --- 🌊 DOT WAVE ANIMATION --- */
+    .typing-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 4px;
+    }
+
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      background-color: #f1f1f1;
+      border-radius: 50%;
+      animation: dotWave 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes dotWave {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-6px); }
+    }
+
     /* --- MOBILE STYLING (Hides sidebar automatically on narrow screens) --- */
     @media (max-width: 767px) {
       .sidebar {
@@ -308,7 +333,7 @@
 
   <div id="auth-screen">
     <h2 id="auth-title">Welcome to TingTalk AI</h2>
-    <p id="auth-subtitle" style="color: #aaa; font-size: 0.95rem;">Please sign in to start chatting</p>
+    <p id="authSubtitle" style="color: #aaa; font-size: 0.95rem;">Please sign in to start chatting</p>
     
     <form class="auth-form" id="emailAuthForm">
       <input type="email" id="authEmail" class="auth-input" placeholder="Email Address" required>
@@ -427,8 +452,7 @@
       }
 
     } catch (err) {
-      console.warn("Backend routing not fully deployed. Emulating frontend login transition for user experience...", err);
-      // FALLBACK EMULATION: This lets you log in even if Render returns 404
+      console.warn("Backend routing error. Falling back to frontend emulator session...", err);
       loginUserSession(email);
     } finally {
       authSubmitBtn.disabled = false;
@@ -590,9 +614,17 @@
       renderSidebar();
     }
 
+    // Modernized loader block using innerHTML to hold the animated wave dots
     const loadingDiv = document.createElement('div');
     loadingDiv.classList.add('message', 'TingTalk');
-    loadingDiv.textContent = 'TingTalk is thinking... 🤔';
+    loadingDiv.innerHTML = `
+      TingTalk is thinking
+      <div class="typing-indicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    `;
     chatMessages.appendChild(loadingDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
