@@ -864,7 +864,6 @@
       </div>
     </div>
   </div>
-
 <script>
   const API_URL = 'https://ai-backend-sdpl.onrender.com/chat';
   const BACKEND_BASE = 'https://ai-backend-sdpl.onrender.com/api'; 
@@ -931,17 +930,25 @@
     // Async loader to fetch extensive external blocklist safely
     async function loadBadWords() {
       try {
-        const response = await fetch('https://raw.githubusercontent.com/coffee-and-fun/google-profanity-words/main/data/list.txt');
+        // FIXED: Pointing directly to the correct repository data path (en.txt)
+        const response = await fetch('https://raw.githubusercontent.com/coffee-and-fun/google-profanity-words/main/data/en.txt');
+        
+        if (!response.ok) throw new Error("Network response was not ok");
+        
         const text = await response.text();
         // Split text content by line break, clean values, filter empty strings
         BANNED_WORDS = text.split('\n').map(word => word.trim().toLowerCase()).filter(Boolean);
         
         // Append optional manual custom overrides to prevent specific spam formats
         BANNED_WORDS.push('spamtext', 'offensiveword');
+        console.log(`Successfully loaded ${BANNED_WORDS.length} banned words.`);
       } catch (err) {
         console.warn("Failed to load global bad words list, using fallback dictionary.", err);
-        // Secure offline fallback setup
-        BANNED_WORDS = ["badword1", "badword2", "jerk", "stupid"];
+        // Robust fallback list containing common variations to protect your form offline
+        BANNED_WORDS = [
+          "badword1", "badword2", "jerk", "stupid", "idiot", 
+          "dumbass", "moron", "crap", "scam", "spam"
+        ];
       }
     }
     
