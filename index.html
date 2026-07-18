@@ -1420,13 +1420,17 @@
       }
     };
 
-    handleLogout = function() {
+handleLogout = function() {
       allSavedChats = [];
       activeChatId = null;
       currentUserName = "";
       isAiThinking = false;
+      
+      // Keep this: clears the user session name so they are logged out
       localStorage.removeItem('TingTalk_user_name'); 
-      localStorage.removeItem('TingTalk_saved_chats');
+      
+      // REMOVED: localStorage.removeItem('TingTalk_saved_chats'); -> This keeps chats saved on the device!
+      
       chatMessages.innerHTML = '';
       conversationsList.innerHTML = '';
       
